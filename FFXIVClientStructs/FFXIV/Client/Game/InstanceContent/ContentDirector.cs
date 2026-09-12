@@ -15,11 +15,14 @@ public unsafe partial struct ContentDirector {
 
     [FieldOffset(0x528)] public DutyActionManager DutyActionManager;
 
+    [FieldOffset(0xC88)] public Utf8String* InstanceContentTexts;
     [FieldOffset(0xC90)] public MapEffectList* MapEffects;
     [FieldOffset(0xC98)] private DynamicEventContainer* DynamicEvents;
 
     /// <remarks> This might also be a countdown until the content starts (e.g. Frontlines), then the actual time left of the content. </remarks>
     [FieldOffset(0xCF0)] public float ContentTimeLeft;
+    [FieldOffset(0xCFC)] public uint InstanceContentTextStartRowId;
+    [FieldOffset(0xD00)] public uint InstanceContentTextRowCount;
 
     [VirtualFunction(303)]
     public partial uint GetCurrentLevel();
@@ -27,12 +30,25 @@ public unsafe partial struct ContentDirector {
     [VirtualFunction(304)]
     public partial uint GetMaxLevel();
 
+    /// <summary>Processes updates specific for this director. This handles the categories between 0 and 0x80000000.</summary>
+    [VirtualFunction(325)]
+    public partial void ProcessDirectorSpecificDirectorUpdate(uint category, uint* parameters);
+
     /// <summary>
     /// Gets the max time for the content in seconds
     /// </summary>
     /// <returns>Time in seconds</returns>
     [VirtualFunction(329)]
     public partial uint GetContentTimeMax();
+
+    [VirtualFunction(354)]
+    public partial Utf8String* GetInstanceContentText(uint rowId);
+
+    [MemberFunction("E8 ?? ?? ?? ?? 80 AB ?? ?? ?? ?? ?? 75")]
+    public partial void* LoadInstanceContentTexts(uint startRowId, uint rowCount);
+
+    [MemberFunction("E8 ?? ?? ?? ?? FF C7 48 8D 76 ?? 3B FD"), GenerateStringOverloads]
+    public partial void SetInstanceContentText(uint rowId, CStringPointer text);
 
     /// <summary>Changes the state of a map effect.</summary>
     /// <param name="index">Index into MapEffects.</param>
@@ -46,6 +62,10 @@ public unsafe partial struct ContentDirector {
     /// <param name="timelineIndex">Which timeline to play.</param>
     [MemberFunction("E8 ?? ?? ?? ?? 3A C3 74 ?? 44 0F B7 C5")]
     public partial bool PlayMapEffectTimeline(uint index, ushort timelineIndex);
+
+    /// <summary>Processes updates shared between all content (e.g. setting the background music). This handles categories above 0x80000000.</summary>
+    [MemberFunction("48 89 6C 24 ?? 48 89 74 24 ?? 57 48 83 EC ?? 81 C2 ?? ?? ?? ?? 41 8B E9")]
+    public partial void ProcessCommonDirectorUpdate(uint category, uint arg1, uint arg2, uint arg3, uint arg4);
 
     [GenerateInterop]
     [StructLayout(LayoutKind.Explicit, Size = 0x608)]

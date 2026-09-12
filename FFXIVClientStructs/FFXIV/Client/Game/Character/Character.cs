@@ -1,6 +1,7 @@
 using FFXIVClientStructs.FFXIV.Client.Game.Control;
 using FFXIVClientStructs.FFXIV.Client.Game.Control.MoveControl;
 using FFXIVClientStructs.FFXIV.Client.Game.Object;
+using FFXIVClientStructs.FFXIV.Client.UI.Misc;
 
 namespace FFXIVClientStructs.FFXIV.Client.Game.Character;
 
@@ -10,7 +11,7 @@ namespace FFXIVClientStructs.FFXIV.Client.Game.Character;
 [GenerateInterop(isInherited: true)]
 [Inherits<GameObject>, Inherits<CharacterData>]
 [StructLayout(LayoutKind.Explicit, Size = 0x2370)]
-[VirtualTable("48 8D 05 ?? ?? ?? ?? 48 89 07 48 8D 8F ?? ?? ?? ?? 48 8D 05 ?? ?? ?? ?? 48 89 87 ?? ?? ?? ?? E8 ?? ?? ?? ?? 48 8D 8F ?? ?? ?? ?? 33 ED 48 8D 05 ?? ?? ?? ??", 3, 87)]
+[VirtualTable("48 8D 05 ?? ?? ?? ?? 48 89 07 48 8D 8F ?? ?? ?? ?? 48 8D 05 ?? ?? ?? ?? 48 89 87 ?? ?? ?? ?? E8 ?? ?? ?? ?? 48 8D 8F ?? ?? ?? ?? 33 ED 48 8D 05 ?? ?? ?? ??", 3, 88)]
 public unsafe partial struct Character {
     [FieldOffset(0x1F0)] public MoveController MoveController;
     [FieldOffset(0x630)] public EmoteController EmoteController;
@@ -18,7 +19,8 @@ public unsafe partial struct Character {
     [FieldOffset(0x6D8)] public CompanionContainer CompanionData;
     [FieldOffset(0x6F8)] public DrawDataContainer DrawData;
     [FieldOffset(0x960)] public OrnamentContainer OrnamentData;
-    [FieldOffset(0x9D8)] public ReaperShroudContainer ReaperShroud;
+    [FieldOffset(0x9D8)] public TransformationContainer Transformation;
+    [FieldOffset(0x9D8), Obsolete("Use Transformation")] public ReaperShroudContainer ReaperShroud;
     [FieldOffset(0xA30)] public TimelineContainer Timeline;
     [FieldOffset(0xD80)] public LookAtContainer LookAt;
     [FieldOffset(0x1960)] public LifeSkillContainer LifeSkillContainer;
@@ -73,7 +75,8 @@ public unsafe partial struct Character {
     [FieldOffset(0x231C)] public float CastRotation;
 
     [FieldOffset(0x2338)] public uint NameId;
-
+    [FieldOffset(0x233C)] public uint EventHandlerNameId; // coming from (Quest)EventHandler.vf242 (lua function "GetBattleNpcNameId"), set in the Character.Update function
+    [FieldOffset(0x2340)] public uint TransformationNameId; // set/unset via statuses
     [FieldOffset(0x2344)] public uint CompanionOwnerId; // TODO: Find a better name as it is used to index into FurnitureMemory for IndoorHousing
     [FieldOffset(0x2348)] public ObjectType ObjectType;
 
@@ -188,6 +191,9 @@ public unsafe partial struct Character {
 
     [VirtualFunction(82)]
     public partial ActionEffectHandler* GetActionEffectHandler();
+
+    [VirtualFunction(83)]
+    public partial StdDeque<ScreenLogEntry>* GetScreenLogManager();
 
     [VirtualFunction(84)]
     public partial ForayInfo* GetForayInfo();

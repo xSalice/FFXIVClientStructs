@@ -6,7 +6,7 @@ namespace FFXIVClientStructs.FFXIV.Client.Game.UI;
 
 // Client::Game::UI::PlayerState
 [GenerateInterop]
-[StructLayout(LayoutKind.Explicit, Size = 0x920)]
+[StructLayout(LayoutKind.Explicit, Size = 0x928)]
 public unsafe partial struct PlayerState {
     [StaticAddress("48 8D 0D ?? ?? ?? ?? E8 ?? ?? ?? ?? 84 C0 75 06 F6 43 18 02", 3)]
     public static partial PlayerState* Instance();
@@ -70,24 +70,30 @@ public unsafe partial struct PlayerState {
     [FieldOffset(0x1A8), FixedSizeArray] internal FixedSizeArray74<int> _attributes;
     [FieldOffset(0x2D0)] public byte GrandCompany;
     /// <remarks>
-    /// 0 = Maelstrom <br/>
-    /// 1 = Order of the Twin Adder <br/>
+    /// 0 = Maelstrom<br/>
+    /// 1 = Order of the Twin Adder<br/>
     /// 2 = Immortal Flames
     /// </remarks>
     [FieldOffset(0x2D1), FixedSizeArray] internal FixedSizeArray3<byte> _GCRanks;
     [FieldOffset(0x2D4)] public ushort HomeAetheryteId;
     [FieldOffset(0x2D6)] public byte FavouriteAetheryteCount;
     [FieldOffset(0x2D8), FixedSizeArray] internal FixedSizeArray4<ushort> _favouriteAetherytes;
-    [FieldOffset(0x2E0)] public ushort FreeAetheryteId;
-    [FieldOffset(0x2E2)] public ushort FreeAetherytePSPlus; // PlayStation Plus
-    [FieldOffset(0x2E4)] public ushort FreeAetheryteNSO; // Nintendo Switch Online
+    /// <remarks>
+    /// 0 = Security Token<br/>
+    /// 1 = PlayStation Plus<br/>
+    /// 2 = Nintendo Switch Online
+    /// </remarks>
+    [FieldOffset(0x2E0), FixedSizeArray] internal FixedSizeArray2<ushort> _freeAetheryteIds;
+    [FieldOffset(0x2E0), Obsolete("Use FreeAetheryteIds[0]")] public ushort FreeAetheryteId;
+    [FieldOffset(0x2E2), Obsolete("Use FreeAetheryteIds[1]")] public ushort FreeAetherytePSPlus;
+    [FieldOffset(0x2E4), Obsolete("Use FreeAetheryteIds[2]")] public ushort FreeAetheryteNSO;
     [FieldOffset(0x2E8)] public uint BaseRestedExperience;
     // [FieldOffset(0x2F8), FixedSizeArray] internal FixedSizeArray4<byte> _unk2C8; // GCSupply stuff
     // [FieldOffset(0x2FC), FixedSizeArray] internal FixedSizeArray16<byte> _unk2CC; // GCSupply stuff
     [FieldOffset(0x300)] private sbyte Unk2DC; // GCSupply stuff
     // BitCount: MountSheet.Where(row => row.ModelChara.RowId != 0).Max(row => row.Order))
     /// <remarks> Use <see cref="IsMountUnlocked"/>. </remarks>
-    [FieldOffset(0x301), FixedSizeArray(isBitArray: true, bitCount: 358)] internal FixedSizeArray45<byte> _unlockedMounts;
+    [FieldOffset(0x301), FixedSizeArray(isBitArray: true, bitCount: 359)] internal FixedSizeArray45<byte> _unlockedMounts;
     // BitCount: OrnamentSheet.RowCount
     /// <remarks> Use <see cref="IsOrnamentUnlocked"/>. </remarks>
     [FieldOffset(0x32E), FixedSizeArray(isBitArray: true, bitCount: 59)] internal FixedSizeArray8<byte> _unlockedOrnaments;
@@ -240,13 +246,18 @@ public unsafe partial struct PlayerState {
     [FieldOffset(0x860)] public int FauxHollowsState;
     [FieldOffset(0x868)] public StdVector<ushort> CompletedCrystariumDeliveryQuests;
     [FieldOffset(0x880)] public StdSet<byte> UnlockedMcGuffins;
-    [FieldOffset(0x890), FixedSizeArray] internal FixedSizeArray33<byte> _unlockedFramersKitsBitmask;
+    [FieldOffset(0x890), Obsolete("Use UnlockedFramersKitsBitArray"), FixedSizeArray] internal FixedSizeArray33<byte> _unlockedFramersKitsBitmask;
+    // the field actually has space for slightly more bits, but this number is taken from the highest FramerKit item
+    // BitCount: See IsFramersKitUnlocked
+    [FieldOffset(0x890), FixedSizeArray(isBitArray: true, bitCount: 352)] internal FixedSizeArray44<byte> _unlockedFramersKits;
 
-    [FieldOffset(0x8D8)] public StdMap<uint, bool> TrackedStatuses;
-    [FieldOffset(0x8E8)] public StdMap<uint, bool> TrackedActionUnlocks;
-    [FieldOffset(0x8F8)] public StdMap<uint, bool> TrackedTraitUnlocks;
-    [FieldOffset(0x908)] public bool TrackedTraitUnlocksDirty;
-    [FieldOffset(0x909)] public bool TrackedActionUnlocksDirty;
+    [FieldOffset(0x8D8)] private int UnkTofuTimestamp;
+    [FieldOffset(0x8E0)] public StdMap<uint, bool> TrackedStatuses;
+    [FieldOffset(0x8F0)] public StdMap<uint, bool> TrackedActionUnlocks;
+    [FieldOffset(0x900)] public StdMap<uint, bool> TrackedTraitUnlocks;
+    [FieldOffset(0x910)] public bool TrackedTraitUnlocksDirty;
+    [FieldOffset(0x911)] public bool TrackedActionUnlocksDirty;
+    // [FieldOffset(0x910)] private StdMap/StdSet<?> ReplaceActions;
 
     public float GetDesynthesisLevel(uint classJobId)
         => classJobId is < 8 or > 15 ? 0 : DesynthesisLevels[(int)classJobId - 8] / 100f;
@@ -515,7 +526,7 @@ public unsafe partial struct PlayerState {
     /// <summary>
     /// Returns whether the player is any kind of Mentor (Battle or Trade Mentor).
     /// </summary>
-    [MemberFunction("E8 ?? ?? ?? ?? 84 C0 74 0D B0 02")]
+    [MemberFunction("E8 ?? ?? ?? ?? 84 C0 74 ?? 48 8B 3D")]
     public partial bool IsMentor();
 
     /// <summary>
