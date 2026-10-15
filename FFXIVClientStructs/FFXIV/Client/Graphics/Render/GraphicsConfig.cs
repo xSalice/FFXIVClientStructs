@@ -16,6 +16,8 @@ public unsafe partial struct GraphicsConfig {
 
     [FieldOffset(0x12)] public bool ShadowLOD;
     [FieldOffset(0x13)] public bool ShadowBgLOD;
+    /// <summary> Gates the occlusion tests in <see cref="Culling.CullingManager"/>. Not tied to a ConfigOption, set on load. </summary>
+    [FieldOffset(0x14)] public bool OcclusionCulling;
 
     [FieldOffset(0x15)] public bool CharaWetness;
     [FieldOffset(0x16)] public bool CharaOutline; // based on the state of AtkUnitManagerFlags.UiHidden
@@ -68,4 +70,8 @@ public unsafe partial struct GraphicsConfig {
     [FieldOffset(0x6A)] public bool IsIndoor; // This is true when the layouts lvb path contains "ind/", like for houses, apartments, or chambers.
 
     [FieldOffset(0x78)] public float JitterMultiplier;
+    [FieldOffset(0x80)] private ulong PendingEventFlags;
+    [FieldOffset(0x88)] private ulong EventFlags;
+
+    public bool ResetTemporalHistory => (EventFlags & 1) != 0;
 }
